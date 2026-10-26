@@ -21,6 +21,7 @@ const { data, status, error, refresh } = await useFetch<BudgetsResponse>('/api/b
 const amounts = reactive<Record<string, string>>({})
 const dirty = ref(new Set<string>())
 const saving = ref(false)
+const deleting = ref<string | null>(null)
 
 watch(
   data,
@@ -61,6 +62,22 @@ async function saveAll() {
     toast.add({ title: errMsg(e), color: 'error' })
   } finally {
     saving.value = false
+  }
+}
+
+async function deleteBudget(item: BudgetItem) {
+  if (!item.budgetId) return
+  if (!window.confirm(`¿Eliminar el presupuesto de "${item.name}" para ${month.value}/${year.value}?`)) return
+
+  deleting.value = item.budgetId
+  try {
+    await $fetch(`/api/budgets/${item.budgetId}`, { method: 'DELETE' })
+    toast.add({ title: 'Presupuesto eliminado', color: 'success' })
+    await refresh()
+  } catch (e: unknown) {
+    toast.add({ title: errMsg(e), color: 'error' })
+  } finally {
+    deleting.value = null
   }
 }
 
@@ -145,6 +162,17 @@ function errMsg(e: unknown): string {
               <div class="h-full rounded-full transition-all" :class="barClass(item)" :style="{ width: `${Math.min(pct(item), 100)}%` }" />
             </div>
           </div>
+
+          <UButton
+            v-if="item.budgetId"
+            icon="i-lucide-trash-2"
+            color="error"
+            variant="ghost"
+            :loading="deleting === item.budgetId"
+            :disabled="saving || deleting !== null"
+            aria-label="Eliminar presupuesto"
+            @click="deleteBudget(item)"
+          />
         </div>
 
         <p class="text-xs text-muted pt-2 border-t border-default">
