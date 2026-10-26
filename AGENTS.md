@@ -58,8 +58,9 @@ Reglas importantes:
 ## WhatsApp
 
 Baileys se ejecuta únicamente en `services/whatsapp-connector`. El servicio
-solo escucha el `whatsapp_group_id` autorizado, deduplica por identificador de
-mensaje y persiste el texto mínimo necesario. La extracción determinística
+implementa QR, sesión persistente, reconexión controlada, health check, escucha
+exclusiva del `whatsapp_group_id` autorizado, deduplicación por identificador de
+mensaje y persistencia del texto mínimo necesario. La extracción determinística
 queda en `PENDING_REVIEW`; las interpretaciones ambiguas requieren corrección o
 rechazo manual. No se descargan medios ajenos a la finalidad financiera, no se
 envían mensajes masivos y no se guardan credenciales en Git.

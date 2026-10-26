@@ -56,8 +56,10 @@ ninguna tiene `household_id`.
 ## Integraciones
 
 - Supabase configurado mediante variables de entorno server-side.
-- Baileys: pendiente de implementación; no existe sesión ni credencial local
-  documentada aquí.
+- Baileys: implementado el conector inicial en
+  `services/whatsapp-connector/`. Incluye QR, sesión persistente, reconexión,
+  filtro estricto por grupo, deduplicación y extracción `PENDING_REVIEW`.
+  Todavía no existe una sesión real ni se vinculó un grupo desde este entorno.
 
 ## Problemas conocidos
 
@@ -80,7 +82,8 @@ ninguna tiene `household_id`.
 4. Implementar Auth, resolución de hogar y políticas RLS verificadas.
 5. Ampliar APIs y tipos financieros.
 6. Implementar tareas y bandeja de revisión.
-7. Crear el conector Baileys y sus pruebas de reconexión/deduplicación.
+7. Desplegar y vincular el conector Baileys con consentimiento, y agregar
+   pruebas de reconexión/deduplicación.
 
 ## Responsabilidades
 

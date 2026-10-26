@@ -95,8 +95,9 @@ Abrí <http://localhost:3100>
 - `server/api/`: BFF y validaciones server-side.
 - `shared/types/`: contratos TypeScript compartidos.
 - `supabase/migrations/`: cambios incrementales de PostgreSQL, RLS y dominio.
-- `services/whatsapp-connector/`: conector independiente de Baileys, pendiente
-  de implementación.
+- `services/whatsapp-connector/`: conector independiente de Baileys con sesión
+  persistente, QR, reconexión, filtrado por grupo y extracción pendiente de
+  revisión.
 
 Los endpoints nuevos de hogares requieren un token de Supabase en el header
 `Authorization` y validan la membresía activa en servidor. La resolución de
@@ -110,10 +111,12 @@ Las primeras APIs de dominio autenticadas son:
 - `/api/households/:id/tasks` para tareas, responsables, prioridades, costos y
   estados.
 
-Baileys no se ejecutará dentro del frontend. El conector solo persistirá
-mensajes del grupo autorizado por su identificador real, con deduplicación y
-estado `PENDING_REVIEW` para las interpretaciones. No se enviarán mensajes
-masivos ni se descargarán medios ajenos a la finalidad financiera.
+Baileys no se ejecuta dentro del frontend. El conector solo persiste mensajes
+del grupo autorizado por su identificador real, con deduplicación y estado
+`PENDING_REVIEW` para las interpretaciones. No se envían mensajes masivos ni se
+descargan medios ajenos a la finalidad financiera. La vinculación real requiere
+configurar el servicio, aplicar las migraciones y habilitar el grupo en
+Supabase.
 
 ## Responsabilidades y datos reales
 
