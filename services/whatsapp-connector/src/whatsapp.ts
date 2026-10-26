@@ -35,7 +35,7 @@ export async function startWhatsApp(): Promise<void> {
 
   try {
     current.groupAuthorized = await ensureAuthorizedGroup()
-    if (!current.groupAuthorized) {
+    if (config.groupId && !current.groupAuthorized) {
       current.status = 'error'
       current.lastError = 'The configured group is not enabled in Supabase.'
       logger.error({ groupId: config.groupId }, current.lastError)
@@ -56,7 +56,7 @@ export async function startWhatsApp(): Promise<void> {
     nextSocket.ev.on('messages.upsert', async ({ messages, type }) => {
       if (type !== 'notify') return
       for (const message of messages) {
-        if (message.key.fromMe || message.key.remoteJid !== config.groupId) continue
+        if (!config.groupId || message.key.fromMe || message.key.remoteJid !== config.groupId) continue
         try {
           await persistMessage(message)
         } catch (error) {
@@ -86,6 +86,7 @@ async function handleConnectionUpdate(update: { connection?: 'open' | 'close' | 
     current.lastError = null
     await setConnectionStatus('CONNECTED')
     logger.info('WhatsApp connected')
+    if (!config.groupId) await discoverGroups()
   }
   if (update.connection !== 'close') return
 
@@ -100,6 +101,17 @@ async function handleConnectionUpdate(update: { connection?: 'open' | 'close' | 
     return
   }
   scheduleReconnect()
+}
+
+async function discoverGroups() {
+  if (!socket) return
+  try {
+    const groups = await socket.groupFetchAllParticipating()
+    logger.info({ groups: Object.values(groups).map(group => ({ id: group.id, name: group.subject })) }, 'Available WhatsApp groups; configure WHATSAPP_GROUP_ID and enable exactly one group in Supabase')
+  } catch (error) {
+    current.lastError = error instanceof Error ? error.message : String(error)
+    logger.error({ err: error }, 'Could not list WhatsApp groups')
+  }
 }
 
 function scheduleReconnect() {

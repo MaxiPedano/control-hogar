@@ -7,6 +7,8 @@ de Nuxt y no envía mensajes.
 
 - Escucha únicamente `WHATSAPP_GROUP_ID`.
 - Requiere que ese grupo exista y esté `enabled = true` en `whatsapp_groups`.
+- Si `WHATSAPP_GROUP_ID` está vacío durante la primera vinculación, lista los
+  grupos disponibles en los logs sin persistir ni procesar sus mensajes.
 - Persiste texto mínimo, remitente, fecha, tipo e identificador del mensaje.
 - Deduplica con `group_id, whatsapp_message_id`.
 - Genera extracciones determinísticas con `PENDING_REVIEW`.
@@ -18,7 +20,8 @@ de Nuxt y no envía mensajes.
 
 Copiá `.env.example` a `.env` y completá los valores en el entorno de
 despliegue. `SUPABASE_SERVICE_ROLE_KEY` solo debe existir en este servicio y
-nunca en el frontend.
+nunca en el frontend. Dejá `WHATSAPP_GROUP_ID` vacío durante la primera
+vinculación si todavía no conocés el identificador técnico.
 
 ```bash
 pnpm install
@@ -34,6 +37,10 @@ grupo y último error sin secretos.
 Al iniciar sin una sesión válida, Baileys imprime un QR en los logs. La sesión
 queda en el volumen configurado. Las desconexiones se reintentan, excepto una
 sesión explícitamente deslogueada, que requiere vinculación manual.
+
+Después de escanear el QR, copiá del log el `id` del grupo correcto, configurá
+`WHATSAPP_GROUP_ID`, insertá ese mismo ID en `whatsapp_groups` con
+`enabled = true` y reiniciá el servicio.
 
 ## Riesgos operativos
 

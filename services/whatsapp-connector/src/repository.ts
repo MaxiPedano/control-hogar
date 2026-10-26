@@ -7,6 +7,8 @@ let connectionId: string | null = null
 let groupId: string | null = null
 
 export async function ensureAuthorizedGroup(): Promise<boolean> {
+  if (!config.groupId) return false
+
   const { data, error } = await supabase
     .from('whatsapp_groups')
     .select('id, connection_id, enabled')
