@@ -1,0 +1,89 @@
+# Memoria de Control Hogar
+
+## Objetivo
+
+Ampliar la aplicación personal de finanzas y horas hacia una plataforma
+familiar con cuentas, presupuestos, deudas, tarjetas, tareas, proyecciones y
+revisión de mensajes del grupo Finanzas de WhatsApp.
+
+## Estado de implementación
+
+- Diagnóstico inicial completado.
+- La aplicación actual usa Nuxt 4, Nitro, Nuxt UI y Supabase server-side.
+- Existen dos migraciones preparadas, aún no aplicadas al proyecto Supabase
+  remoto: `0001_control_hogar_2_foundation.sql` y
+  `0002_legacy_assignment_audit.sql`.
+- Se agregaron endpoints autenticados iniciales para listar/crear hogares y
+  administrar integrantes.
+- No se han insertado movimientos históricos, datos ficticios ni ejemplos.
+
+## Decisiones arquitectónicas
+
+- Mantener el frontend y BFF dentro de Nuxt.
+- Ejecutar Baileys como servicio independiente.
+- Aislar datos por `household_id` y usuario autenticado.
+- Mantener mensajes de WhatsApp como origen inmutable y separar extracción de
+  confirmación.
+- Usar migraciones incrementales y no destructivas.
+- Los endpoints nuevos validan el bearer token y la membresía activa en el BFF;
+  las rutas legacy se mantienen aisladas hasta su migración.
+
+## Tablas existentes
+
+Según la última revisión autorizada del proyecto `nwiujscmeumxgenhkfok`, el
+esquema remoto contiene `categories` (15), `transactions` (13), `budgets` (11)
+y `work_entries` (0). Todas tienen RLS activado sin políticas configuradas y
+ninguna tiene `household_id`.
+
+## Migraciones aplicadas
+
+- Ninguna aplicada en Supabase remoto.
+- Preparadas `0001_control_hogar_2_foundation.sql` y
+  `0002_legacy_assignment_audit.sql`.
+- No se modificó ningún registro remoto existente.
+- La migración fundacional fue revisada para que las columnas nuevas de tablas
+  históricas sean nullable y no materialicen defaults en registros existentes.
+
+## Funcionalidades desarrolladas
+
+- Funcionalidad original: horas, ingresos/gastos, categorías y presupuestos.
+- Documentación inicial de arquitectura, seguridad, reglas financieras y
+  operación de WhatsApp.
+- API inicial de hogares en `server/api/households/`.
+- APIs autenticadas iniciales de cuentas y tareas bajo el hogar, con validación
+  de moneda, responsables, costos, prioridades y estados.
+
+## Integraciones
+
+- Supabase configurado mediante variables de entorno server-side.
+- Baileys: pendiente de implementación; no existe sesión ni credencial local
+  documentada aquí.
+
+## Problemas conocidos
+
+- La app actual no tiene autenticación de usuario ni autorización por hogar.
+- Las rutas legacy aún no exigen autenticación; no deben exponerse como versión
+  multiusuario hasta completar su migración.
+- Las API actuales usan cliente administrativo y deben migrarse a contexto de
+  usuario antes de habilitar multiusuario.
+- El typecheck muestra una advertencia de compatibilidad de Volar con la
+  exportación de `vue-router`; la línea base sigue sin errores reportados.
+- El build compila el cliente, pero el bundle SSR puede fallar por asignación de
+  memoria de Rolldown en este entorno (`exit 3221226505`); requiere repetir en
+  un entorno con más memoria o ajustar la toolchain de build.
+
+## Próximas tareas
+
+1. Presentar el SQL y obtener autorización antes de aplicar las migraciones.
+2. Revisar el esquema remoto después de cada migración.
+3. Definir y auditar la asociación explícita de históricos.
+4. Implementar Auth, resolución de hogar y políticas RLS verificadas.
+5. Ampliar APIs y tipos financieros.
+6. Implementar tareas y bandeja de revisión.
+7. Crear el conector Baileys y sus pruebas de reconexión/deduplicación.
+
+## Responsabilidades
+
+OpenCode implementa software. ChatGPT administra la información financiera real,
+la conciliación y la clasificación. No guardar secretos, sesiones de WhatsApp
+ni información financiera privada innecesaria en este archivo.
